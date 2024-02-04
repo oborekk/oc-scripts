@@ -7,7 +7,6 @@ use futures_util::{Stream, TryStreamExt};
 use std::default::Default;
 use std::io::{stdout, Write};
 
-#[tokio::main]
 pub async fn docker_image(
     container: &str,
 ) -> Result<impl Stream<Item = Result<LogOutput, Error>>, Box<dyn std::error::Error + 'static>> {

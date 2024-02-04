@@ -22,13 +22,12 @@ fn stream() -> EventStream![] {
         //     count += 1;
         // }
 
-        let logs = docker_image("e052fcf8b981").unwrap();
+        let mut logs = docker_image("e052fcf8b981").await.unwrap();
         // loop {
-            yield Event::data("wip");
             while let Ok(Some(output)) = &logs.try_next().await {
                 match output {
-                    LogOutput::StdOut { message } => yield Event::data(message.into_string()),
-                    LogOutput::StdErr { message } => yield Event::data(message),
+                    LogOutput::StdOut { message } => yield Event::data(String::from_utf8(message.to_vec()).unwrap()),
+                    LogOutput::StdErr { message } => yield Event::data(String::from_utf8(message.to_vec()).unwrap()),
                     _ => (),
                 }
             }
@@ -36,9 +35,14 @@ fn stream() -> EventStream![] {
     }
 }
 
+#[get("/start")]
+fn start() -> &'static str {
+    "<div hx-ext=\"sse\" sse-connect=\"/events\" sse-swap=\"message\">"
+}
+
 #[launch]
 fn rocket() -> _ {
     rocket::build()
-        .mount("/", routes![stream])
+        .mount("/", routes![stream, start])
         .mount("/", FileServer::from("src/static"))
 }
