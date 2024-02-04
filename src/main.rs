@@ -1,6 +1,8 @@
 pub mod docker;
 
 use crate::docker::docker_image;
+use bollard::container::LogOutput;
+use futures_util::{Stream, TryStreamExt};
 use rocket::fs::FileServer;
 use rocket::response::stream::{Event, EventStream};
 use rocket::tokio::time::{self, Duration};
@@ -20,10 +22,17 @@ fn stream() -> EventStream![] {
         //     count += 1;
         // }
 
-        docker_image();
-        loop {
+        let logs = docker_image("e052fcf8b981").unwrap();
+        // loop {
             yield Event::data("wip");
-        }
+            while let Ok(Some(output)) = &logs.try_next().await {
+                match output {
+                    LogOutput::StdOut { message } => yield Event::data(message.into_string()),
+                    LogOutput::StdErr { message } => yield Event::data(message),
+                    _ => (),
+                }
+            }
+        // }
     }
 }
 
