@@ -2,29 +2,30 @@ pub mod docker;
 
 use crate::docker::docker_setup;
 use bollard::container::LogOutput;
-use docker::{docker_logs, docker_remove};
+use docker::{docker_logs, docker_remove, logger};
 use futures_util::TryStreamExt;
+use rocket::form::Form;
 use rocket::fs::FileServer;
+use rocket::response::stream::{Event, EventStream};
 use rocket::{launch, routes};
 #[macro_use]
 extern crate rocket;
 
-#[post("/start/<option>")]
-async fn start(option: &str) -> String {
-    // "<div hx-ext=\"sse\" sse-connect=\"/events\" sse-swap=\"message\" sse-target=\"#celsius\">"
-    let id = docker_setup(option).await;
+#[derive(FromForm)]
+struct Params<'r> {
+    params: &'r str,
+}
+
+#[post("/start/<option>", data = "<params>")]
+async fn start(option: &str, params: Form<Params<'_>>) -> String {
+    let id = docker_setup(option, params.params).await;
     match id {
-        Ok(v) => format!(
-            // "<div hx-trigger=\"done\" hx-get=\"/logs\" hx-swap=\"outerHTML\" hx-target=\"this\">
-            //     <p
-            //         hx-get=\"/logs/{v}\"
-            //         hx-trigger=\"every 500ms\"
-            //         hx-target=\"this\"
-            //         hx-swap=\"innerHTML\">
-            //     Logs will start here</p>
-            // </div>"
-            "<div hx-swap=\"outerHTML\" hx-get=\"/logs/{v}\" hx-trigger=\"every 1s\"></div>"
-        ),
+        Ok(v) => {
+            format!("
+            <div id=\"sse{v}\">
+                <div hx-target=\"#terminal-{option}\" hx-ext=\"sse\" sse-swap=\"message\" sse-connect=\"/logs/{v}\"></div>
+            </div>")
+        }
         Err(e) => {
             format!("<div>Error! {e}</div>")
         }
@@ -32,39 +33,48 @@ async fn start(option: &str) -> String {
 }
 
 #[get("/logs/<id>")]
-async fn logs(id: &str) -> String {
-    let mut logs = docker_logs(id).await.unwrap();
-    let mut vec: Vec<String> = Vec::new();
-    // let mut res: String = String::from("");
-
-    while let Ok(Some(output)) = &logs.try_next().await {
-        match output {
-            LogOutput::StdOut { message } => {
-                // res = String::from_utf8(message.to_vec()).unwrap();
-                vec.push(String::from_utf8(message.to_vec()).unwrap());
+async fn logs(id: String) -> EventStream![] {
+    let mut logs = docker_logs(&id).await.unwrap();
+    // let mut lifetime = 0;
+    // let mut interval = time::interval(Duration::from_secs(1));
+    EventStream! {
+        let mut vec: Vec<String>  = Vec::new();
+        while let Ok(output) = &logs.try_next().await {
+            match output {
+                Some(v) => match v {
+                    LogOutput::StdOut { message } => {
+                        vec.push(format!("<pre data-prefix=\">\"><code>{}</code></pre>", String::from_utf8(message.to_vec()).unwrap()));
+                        let res = vec.clone().into_iter().collect::<String>();
+                        yield Event::data(res)
+                    }
+                    LogOutput::StdErr { message } => {
+                        vec.push(format!("<pre data-prefix=\">\"><code>{}</code></pre>", String::from_utf8(message.to_vec()).unwrap()));
+                        let res = vec.clone().into_iter().collect::<String>();
+                        yield Event::data(res)
+                    }
+                    _ => (),
+                },
+                None => {
+                    let removal = docker_remove(id.clone()).await;
+                    logger(removal);
+                    break
+                }
             }
-            LogOutput::StdErr { message } => {
-                // res = String::from_utf8(message.to_vec()).unwrap();
-                vec.push(String::from_utf8(message.to_vec()).unwrap());
-            }
-            _ => (),
         }
+        vec.push(format!("<div hx-trigger=\"load\" hx-target=\"#sse{}\" hx-get=\"/stop\"></div>", id));
+        let res = vec.clone().into_iter().collect::<String>();
+        yield Event::data(res)
     }
+}
 
-    vec.iter_mut().for_each(|s| *s = format!("<p>{}</p>", s));
-
-    docker_remove(id).await;
-
-    let res = vec.into_iter().collect::<String>();
-
-    res
-    // let res = vec.into_iter().collect::<String>();
-    // res
+#[get("/stop")]
+fn stop() -> String {
+    String::from("<div></div>")
 }
 
 #[launch]
 fn rocket() -> _ {
     rocket::build()
-        .mount("/", routes![start, logs])
+        .mount("/", routes![start, logs, stop])
         .mount("/", FileServer::from("src/static"))
 }

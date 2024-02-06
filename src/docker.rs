@@ -7,7 +7,11 @@ use futures_util::Stream;
 use std::default::Default;
 use tokio::io::{stdout, AsyncWriteExt};
 
-pub async fn docker_setup(image_id: &str) -> Result<String, Box<dyn std::error::Error + 'static>> {
+// Setup of docker container before starting it
+pub async fn docker_setup(
+    image_id: &str,
+    parameters: &str,
+) -> Result<String, Box<dyn std::error::Error + 'static>> {
     let docker = Docker::connect_with_socket_defaults().unwrap();
 
     let options = Some(CreateContainerOptions {
@@ -19,19 +23,17 @@ pub async fn docker_setup(image_id: &str) -> Result<String, Box<dyn std::error::
     // e052fcf8b981 > celsius
     let config = Config {
         image: Some(image_id),
-        cmd: Some(vec!["10"]),
+        cmd: Some(vec![parameters]),
         ..Default::default()
     };
 
     let id = docker.create_container(options, config).await?.id;
-    // println!("CONTAINER ID {id}");
-    stdout()
-        .write_all(b"Container created with ID {id}")
-        .await?;
+    println!("CONTAINER ID {id}");
 
     Ok(id)
 }
 
+// Logs stream creator
 pub async fn docker_logs(
     id: &str,
 ) -> Result<impl Stream<Item = Result<LogOutput, Error>>, Box<dyn std::error::Error + 'static>> {
@@ -49,7 +51,8 @@ pub async fn docker_logs(
     Ok(logs)
 }
 
-pub async fn docker_remove(id: &str) -> Result<(), bollard::errors::Error> {
+// Container removal for cleanup
+pub async fn docker_remove(id: String) -> Result<(), bollard::errors::Error> {
     let docker = Docker::connect_with_socket_defaults().unwrap();
     docker
         .remove_container(
@@ -60,4 +63,12 @@ pub async fn docker_remove(id: &str) -> Result<(), bollard::errors::Error> {
             }),
         )
         .await
+}
+
+// Uncomplete logging implementation
+pub fn logger(result: Result<(), Error>) {
+    match result {
+        Ok(v) => dbg!(v),
+        Err(e) => println!("{e}"),
+    }
 }

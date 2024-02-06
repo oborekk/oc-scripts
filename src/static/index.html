@@ -1,26 +1,126 @@
 <!DOCTYPE html>
-<html lang="en">
+<html data-theme="dark" lang="en">
   <head>
-    <title>SSE TEST</title>
+    <title></title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="./assets/style.css" rel="stylesheet">
     <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
   </head>
-  <body>
-  
-    <h1>SSE Test</h1>
-    <!-- <button hx-get="/start" type="button">Start!</button> -->
-    <!-- <div hx-ext="sse" sse-connect="/events" sse-swap="message" hx-trigger="click">START</div> -->
+  <body class="bg-[url('circuit-board.svg')]">
+    <div class="drawer">
+      <input id="my-drawer-3" type="checkbox" class="drawer-toggle" /> 
+      <div class="drawer-content flex flex-col">
+        <!-- Navbar -->
+        <div class="w-full navbar bg-neutral text-neutral-content">
+          <div class="flex-none lg:hidden">
+            <label for="my-drawer-3" aria-label="open sidebar" class="btn btn-square btn-ghost">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-6 h-6 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </label>
+          </div> 
+          <div class="flex-1 px-2 mx-2">
+            <label class="swap swap-flip">
+              <input type="checkbox" />
+              <a class="swap-off btn btn-ghost text-xl font-mono text-primary">>//OC-Scripts</a>
+              <a class="swap-on btn btn-ghost text-xl font-mono text-primary">>//Hello World!</a>
+            </label>
+          </div>
+          <div class="flex-none hidden lg:block">
+            <ul class="menu menu-horizontal">
+              <!-- Navbar menu content here -->
+              <li><a href="https://borek.tech">About</a></li>
+            </ul>
+          </div>
+          <div class="flex-none">
+            <a href="https://github.com/oborekk/oc-scripts"><img class="w-7 m-2" alt="Github" src="./assets/github-mark-white.svg"/></a>
+          </div>
+        </div>
+        <!-- Page content here -->
 
-    <!-- <div id="celsius"> -->
-    <!--   <h2>Celsius goes here</h2> -->
-    <!-- </div> -->
+        <!-- Hero Section -->
+        <section class="mb-5 px-6 py-12 bg-base-300 text-primary">
+          <h1 class="text-4xl font-bold text-center">Extraordinarily Complicated Solutions</h2>
+          <p class="mt-2 text-lg text-center">
+              For simple problems.
+          </p>
+        </section>
 
-    <div hx-target="this" hx-swap="outerHTML">
-      <button type="button" hx-post="/start/e052fcf8b981">Start!</button>
-      <!-- <button type="button" hx-post="/start/519f1de54b92">Start!</button> -->
+        <!-- Scripts -->
+        <div class="lg:flex md:grid w-full">
+
+          <!-- Problem 1 -->
+          <div class="card m-5 w-85 grid flex-grow bg-neutral text-neutral-content shadow-xl">
+            <div class="card-body">
+              <h2 class="card-title">Celsius To Fahrenheit</h2>
+              <div id="terminal-35bc65343897" class="mockup-code bg-black">
+                <pre data-prefix="$"><span class="loading loading-ball loading-md"></span></pre>
+              </div>
+              <form class="flex" hx-target="#sse-35bc65343897" hx-post="/start/35bc65343897">
+                <input class="input input-bordered w-full max-w-xs m-2" type="text" name="params" placeholder="Write your input">
+                <button class="btn btn-primary m-2">Run!</button>
+              </form>
+              <div id="sse-35bc65343897"></div>
+            </div>
+          </div>
+
+          <div class="divider divider-horizontal divider-primary"></div>
+
+          <!-- Problem 2 -->
+          <div class="card m-5 w-85 grid flex-grow bg-neutral text-neutral-content shadow-xl">
+            <div class="card-body">
+              <h2 class="card-title">Pinger</h2>
+              <div id="terminal-519f1de54b92" class="mockup-code bg-black">
+                <pre data-prefix="$"><span class="loading loading-ball loading-md"></span></pre>
+              </div>
+              <form class="flex" hx-target="#sse-519f1de54b92" hx-post="/start/e052fcf8b981">
+                <input class="input input-bordered w-full max-w-xs m-2" type="text" name="params" placeholder="Write your input">
+                <button class="btn btn-primary m-2">Run!</button>
+              </form>
+              <div id="sse-519f1de54b92"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="lg:flex md:grid w-full">
+
+          <!-- Problem 3 -->
+          <div class="card m-5 w-85 grid flex-grow bg-neutral text-neutral-content shadow-xl">
+            <div class="card-body">
+              <h2 class="card-title">Anagram Validator</h2>
+              <div class="mockup-code bg-black">
+                <pre data-prefix="$"><span class="loading loading-ball loading-md"></span></pre>
+              </div>
+              <button class="btn btn-primary">Run!</button>
+            </div>
+          </div>
+
+          <div class="divider divider-horizontal divider-primary"></div>
+
+          <!-- Problem 4 -->
+          <div class="card m-5 w-85 grid flex-grow bg-neutral text-neutral-content shadow-xl">
+            <div class="card-body">
+              <h2 class="card-title">Fahrenheit To Celsius</h2>
+              <div class="mockup-code bg-black">
+                <pre data-prefix="$"><span class="loading loading-ball loading-md"></span></pre>
+              </div>
+              <button class="btn btn-primary">Run!</button>
+            </div>
+          </div>
+          
+        </div>
+
+
+      <!-- Mobile Drawer -->
+      </div> 
+      <div class="drawer-side">
+        <label for="my-drawer-3" aria-label="close sidebar" class="drawer-overlay"></label> 
+        <ul class="menu p-4 w-80 min-h-full bg-base-200">
+          <!-- Sidebar content here -->
+          <li><a>About</a></li>
+        </ul>
+      </div>
     </div>
-
   </body>
 </html>
