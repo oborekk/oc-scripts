@@ -1,48 +1,70 @@
 pub mod docker;
 
-use crate::docker::docker_image;
+use crate::docker::docker_setup;
 use bollard::container::LogOutput;
-use futures_util::{Stream, TryStreamExt};
+use docker::{docker_logs, docker_remove};
+use futures_util::TryStreamExt;
 use rocket::fs::FileServer;
-use rocket::response::stream::{Event, EventStream};
-use rocket::tokio::time::{self, Duration};
 use rocket::{launch, routes};
 #[macro_use]
 extern crate rocket;
 
-#[get("/events")]
-fn stream() -> EventStream![] {
-    EventStream! {
-        // let mut interval = time::interval(Duration::from_secs(1));
-        // let mut count = 0;
-        // loop {
-        //     let content = format!("<h2>ping  {}</h2>", count);
-        //     yield Event::data(content);
-        //     interval.tick().await;
-        //     count += 1;
-        // }
-
-        let mut logs = docker_image("e052fcf8b981").await.unwrap();
-        // loop {
-            while let Ok(Some(output)) = &logs.try_next().await {
-                match output {
-                    LogOutput::StdOut { message } => yield Event::data(String::from_utf8(message.to_vec()).unwrap()),
-                    LogOutput::StdErr { message } => yield Event::data(String::from_utf8(message.to_vec()).unwrap()),
-                    _ => (),
-                }
-            }
-        // }
+#[post("/start/<option>")]
+async fn start(option: &str) -> String {
+    // "<div hx-ext=\"sse\" sse-connect=\"/events\" sse-swap=\"message\" sse-target=\"#celsius\">"
+    let id = docker_setup(option).await;
+    match id {
+        Ok(v) => format!(
+            // "<div hx-trigger=\"done\" hx-get=\"/logs\" hx-swap=\"outerHTML\" hx-target=\"this\">
+            //     <p
+            //         hx-get=\"/logs/{v}\"
+            //         hx-trigger=\"every 500ms\"
+            //         hx-target=\"this\"
+            //         hx-swap=\"innerHTML\">
+            //     Logs will start here</p>
+            // </div>"
+            "<div hx-swap=\"outerHTML\" hx-get=\"/logs/{v}\" hx-trigger=\"every 1s\"></div>"
+        ),
+        Err(e) => {
+            format!("<div>Error! {e}</div>")
+        }
     }
 }
 
-#[get("/start")]
-fn start() -> &'static str {
-    "<div hx-ext=\"sse\" sse-connect=\"/events\" sse-swap=\"message\">"
+#[get("/logs/<id>")]
+async fn logs(id: &str) -> String {
+    let mut logs = docker_logs(id).await.unwrap();
+    let mut vec: Vec<String> = Vec::new();
+    // let mut res: String = String::from("");
+
+    while let Ok(Some(output)) = &logs.try_next().await {
+        match output {
+            LogOutput::StdOut { message } => {
+                // res = String::from_utf8(message.to_vec()).unwrap();
+                vec.push(String::from_utf8(message.to_vec()).unwrap());
+            }
+            LogOutput::StdErr { message } => {
+                // res = String::from_utf8(message.to_vec()).unwrap();
+                vec.push(String::from_utf8(message.to_vec()).unwrap());
+            }
+            _ => (),
+        }
+    }
+
+    vec.iter_mut().for_each(|s| *s = format!("<p>{}</p>", s));
+
+    docker_remove(id).await;
+
+    let res = vec.into_iter().collect::<String>();
+
+    res
+    // let res = vec.into_iter().collect::<String>();
+    // res
 }
 
 #[launch]
 fn rocket() -> _ {
     rocket::build()
-        .mount("/", routes![stream, start])
+        .mount("/", routes![start, logs])
         .mount("/", FileServer::from("src/static"))
 }

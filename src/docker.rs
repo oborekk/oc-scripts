@@ -3,32 +3,39 @@ use bollard::container::{
 };
 use bollard::errors::Error;
 use bollard::Docker;
-use futures_util::{Stream, TryStreamExt};
+use futures_util::Stream;
 use std::default::Default;
-use std::io::{stdout, Write};
+use tokio::io::{stdout, AsyncWriteExt};
 
-pub async fn docker_image(
-    container: &str,
-) -> Result<impl Stream<Item = Result<LogOutput, Error>>, Box<dyn std::error::Error + 'static>> {
-    // pub async fn docker_image(container: &str) ->impl Stream<Item = Result<LogOutput, Error>> {
+pub async fn docker_setup(image_id: &str) -> Result<String, Box<dyn std::error::Error + 'static>> {
     let docker = Docker::connect_with_socket_defaults().unwrap();
 
     let options = Some(CreateContainerOptions {
-        name: "celsius-tests",
+        name: "",
         platform: None,
     });
 
     // 519f1de54b92 > pinger
     // e052fcf8b981 > celsius
     let config = Config {
-        image: Some(container),
+        image: Some(image_id),
         cmd: Some(vec!["10"]),
         ..Default::default()
     };
 
     let id = docker.create_container(options, config).await?.id;
-    println!("CONTAINER ID {id}");
+    // println!("CONTAINER ID {id}");
+    stdout()
+        .write_all(b"Container created with ID {id}")
+        .await?;
 
+    Ok(id)
+}
+
+pub async fn docker_logs(
+    id: &str,
+) -> Result<impl Stream<Item = Result<LogOutput, Error>>, Box<dyn std::error::Error + 'static>> {
+    let docker = Docker::connect_with_socket_defaults().unwrap();
     docker.start_container::<String>(&id, None).await?;
 
     let logopts = Some(LogsOptions::<String> {
@@ -37,25 +44,20 @@ pub async fn docker_image(
         ..Default::default()
     });
 
-    let mut logs = docker.logs(&id, logopts);
-
-    // while let Ok(Some(output)) = &logs.try_next().await {
-    //     match output {
-    //         LogOutput::StdOut { message } => stdout().write_all(message)?,
-    //         LogOutput::StdErr { message } => stdout().write_all(message)?,
-    //         _ => (),
-    //     }
-    // }
-
-    // docker
-    //     .remove_container(
-    //         &id,
-    //         Some(RemoveContainerOptions {
-    //             force: true,
-    //             ..Default::default()
-    //         }),
-    //     )
-    //     .await?;
+    let logs = docker.logs(&id, logopts);
 
     Ok(logs)
+}
+
+pub async fn docker_remove(id: &str) -> Result<(), bollard::errors::Error> {
+    let docker = Docker::connect_with_socket_defaults().unwrap();
+    docker
+        .remove_container(
+            &id,
+            Some(RemoveContainerOptions {
+                force: true,
+                ..Default::default()
+            }),
+        )
+        .await
 }
