@@ -1,4 +1,4 @@
-FROM rust:1.67 as builder
+FROM rust:latest as builder
 WORKDIR /usr/src/oc-scripts
 COPY . .
 RUN cargo install --path .
