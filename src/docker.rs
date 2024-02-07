@@ -5,7 +5,6 @@ use bollard::errors::Error;
 use bollard::Docker;
 use futures_util::Stream;
 use std::default::Default;
-use tokio::io::{stdout, AsyncWriteExt};
 
 // Setup of docker container before starting it
 pub async fn docker_setup(
@@ -19,8 +18,6 @@ pub async fn docker_setup(
         platform: None,
     });
 
-    // 519f1de54b92 > pinger
-    // e052fcf8b981 > celsius
     let config = Config {
         image: Some(image_id),
         cmd: Some(vec![parameters]),
@@ -28,7 +25,6 @@ pub async fn docker_setup(
     };
 
     let id = docker.create_container(options, config).await?.id;
-    println!("CONTAINER ID {id}");
 
     Ok(id)
 }

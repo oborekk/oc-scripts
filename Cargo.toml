@@ -1,4 +1,4 @@
-workspace = { members = ["scripts/celsius-to-fahrenheit", "scripts/fahrenheit-to-celsius", "scripts/pinger", "scripts/valid-anagram"] }
+workspace = { members = ["scripts/celsius-to-fahrenheit", "scripts/fahrenheit-to-celsius", "scripts/fizzbuzz", "scripts/pinger"] }
 [package]
 name = "oc-scripts"
 version = "0.1.0"

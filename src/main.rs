@@ -35,8 +35,6 @@ async fn start(option: &str, params: Form<Params<'_>>) -> String {
 #[get("/logs/<id>")]
 async fn logs(id: String) -> EventStream![] {
     let mut logs = docker_logs(&id).await.unwrap();
-    // let mut lifetime = 0;
-    // let mut interval = time::interval(Duration::from_secs(1));
     EventStream! {
         let mut vec: Vec<String>  = Vec::new();
         while let Ok(output) = &logs.try_next().await {

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html data-theme="dark" lang="en">
+<html data-theme="dark" lang="en" class="bg-[url('circuit-board.svg')]">
   <head>
     <title></title>
     <meta charset="UTF-8">
@@ -8,7 +8,7 @@
     <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
   </head>
-  <body class="bg-[url('circuit-board.svg')]">
+  <body>
     <div class="drawer">
       <input id="my-drawer-3" type="checkbox" class="drawer-toggle" /> 
       <div class="drawer-content flex flex-col">
@@ -47,10 +47,10 @@
         </section>
 
         <!-- Scripts -->
-        <div class="lg:flex md:grid w-full">
+        <div class="lg:flex md:grid">
 
           <!-- Problem 1 -->
-          <div class="card m-5 w-85 grid flex-grow bg-neutral text-neutral-content shadow-xl">
+          <div class="card m-5 max-w-24 grid flex-grow bg-neutral text-neutral-content shadow-xl">
             <div class="card-body">
               <h2 class="card-title">Celsius To Fahrenheit</h2>
               <div id="terminal-35bc65343897" class="mockup-code bg-black">
@@ -67,17 +67,17 @@
           <div class="divider divider-horizontal divider-primary"></div>
 
           <!-- Problem 2 -->
-          <div class="card m-5 w-85 grid flex-grow bg-neutral text-neutral-content shadow-xl">
+          <div class="card m-5 max-w-24 grid flex-grow bg-neutral text-neutral-content shadow-xl">
             <div class="card-body">
               <h2 class="card-title">Pinger</h2>
-              <div id="terminal-519f1de54b92" class="mockup-code bg-black">
+              <div id="terminal-7e1cbd61cb2b" class="mockup-code bg-black">
                 <pre data-prefix="$"><span class="loading loading-ball loading-md"></span></pre>
               </div>
-              <form class="flex" hx-target="#sse-519f1de54b92" hx-post="/start/e052fcf8b981">
+              <form class="flex" hx-target="#sse-7e1cbd61cb2b" hx-post="/start/7e1cbd61cb2b">
                 <input class="input input-bordered w-full max-w-xs m-2" type="text" name="params" placeholder="Write your input">
                 <button class="btn btn-primary m-2">Run!</button>
               </form>
-              <div id="sse-519f1de54b92"></div>
+              <div id="sse-7e1cbd61cb2b"></div>
             </div>
           </div>
 
@@ -88,11 +88,16 @@
           <!-- Problem 3 -->
           <div class="card m-5 w-85 grid flex-grow bg-neutral text-neutral-content shadow-xl">
             <div class="card-body">
-              <h2 class="card-title">Anagram Validator</h2>
+              <h2 class="card-title">FizzBuzz</h2>
               <div class="mockup-code bg-black">
                 <pre data-prefix="$"><span class="loading loading-ball loading-md"></span></pre>
               </div>
-              <button class="btn btn-primary">Run!</button>
+              <!-- Todo: Change image ids -->
+              <form class="flex" hx-target="#sse-519f1de54b92" hx-post="/start/e052fcf8b981">
+                <input class="input input-bordered w-full max-w-xs m-2" type="text" name="params" placeholder="Write your input">
+                <button class="btn btn-primary m-2">Run!</button>
+              </form>
+              <div id="sse-519f1de54b92"></div>
             </div>
           </div>
 
@@ -105,7 +110,12 @@
               <div class="mockup-code bg-black">
                 <pre data-prefix="$"><span class="loading loading-ball loading-md"></span></pre>
               </div>
-              <button class="btn btn-primary">Run!</button>
+              <!-- Todo: Change image ids -->
+              <form class="flex" hx-target="#sse-519f1de54b92" hx-post="/start/e052fcf8b981">
+                <input class="input input-bordered w-full max-w-xs m-2" type="text" name="params" placeholder="Write your input">
+                <button class="btn btn-primary m-2">Run!</button>
+              </form>
+              <div id="sse-519f1de54b92"></div>
             </div>
           </div>
           
