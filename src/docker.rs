@@ -11,7 +11,7 @@ pub async fn docker_setup(
     image_id: &str,
     parameters: &str,
 ) -> Result<String, Box<dyn std::error::Error + 'static>> {
-    let docker = Docker::connect_with_unix_defaults().unwrap();
+    let docker = Docker::connect_with_socket_defaults().unwrap();
 
     let options = Some(CreateContainerOptions {
         name: "",
@@ -33,7 +33,7 @@ pub async fn docker_setup(
 pub async fn docker_logs(
     id: &str,
 ) -> Result<impl Stream<Item = Result<LogOutput, Error>>, Box<dyn std::error::Error + 'static>> {
-    let docker = Docker::connect_with_unix_defaults().unwrap();
+    let docker = Docker::connect_with_socket_defaults().unwrap();
     docker.start_container::<String>(&id, None).await?;
 
     let logopts = Some(LogsOptions::<String> {
@@ -49,7 +49,7 @@ pub async fn docker_logs(
 
 // Container removal for cleanup
 pub async fn docker_remove(id: String) -> Result<(), bollard::errors::Error> {
-    let docker = Docker::connect_with_unix_defaults().unwrap();
+    let docker = Docker::connect_with_socket_defaults().unwrap();
     docker
         .remove_container(
             &id,

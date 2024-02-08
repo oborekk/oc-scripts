@@ -74,5 +74,5 @@ fn stop() -> String {
 fn rocket() -> _ {
     rocket::build()
         .mount("/", routes![start, logs, stop])
-        .mount("/", FileServer::from("/static"))
+        .mount("/", FileServer::from("src/static"))
 }
